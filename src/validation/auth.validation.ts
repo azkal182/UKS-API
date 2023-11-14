@@ -17,3 +17,10 @@ export const createSessionValidation = (payload: Prisma.UserCreateInput) => {
   })
   return schema.validate(payload)
 }
+
+export const refreshSessionValidation = (payload: string) => {
+  const schema = Joi.object({
+    refresh_token: Joi.string().required()
+  })
+  return schema.validate(payload)
+}

@@ -5,12 +5,14 @@ export const createUser = async (payload: Prisma.UserCreateInput) => {
   return await prismaClient.user.create({ data: payload })
 }
 
-export const findUserByUsername = async (username: string) => {
-  return await prismaClient.user.findFirst({
+export const findUserByUsername = async (username: string): Promise<any> => {
+  const user = await prismaClient.user.findFirst({
     where: {
       username
     }
   })
+
+  return user
 }
 
 export const getAllUser = async () => {

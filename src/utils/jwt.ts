@@ -14,6 +14,7 @@ export const signJWT = (payload: Object, options?: SignOptions | undefined) => {
 export const verifyJWT = (token: string) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY ?? '')
+    // logger.info({ token, decoded })
     return {
       valid: true,
       expired: false,
