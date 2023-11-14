@@ -54,12 +54,6 @@ export const createSession = async (req: Request, res: Response) => {
     logger.info('new refresh token', newRefreshTokenArray)
 
     if (value.refresh_token) {
-      /*
-        Scenario added here:
-            1) User logs in but never uses RT and does not logout
-            2) RT is stolen
-            3) If 1 & 2, reuse detection is needed to clear all RTs when user logs in
-        */
       const refreshToken = value.refresh_token
       const foundToken = await prismaClient.user.findFirst({ where: { refreshToken } })
 
@@ -112,11 +106,8 @@ export const findUserByRefreshToken = async (refreshToken: string): Promise<any>
   return foundUser
 }
 export const refreshSession = async (req: Request, res: Response) => {
-  //   const cookies = req.cookies
-  //   if (!cookies?.jwt) {
-  //     return res.sendStatus(401)
-  //   }
   const { error, value: refreshToken } = refreshSessionValidation(req.body)
+
   if (error != null) {
     logger.error('ERR auth - refresh session = ', error.details[0].message)
     return res.status(422).send({ status: false, statusCode: 422, message: error.details[0].message })
@@ -133,7 +124,6 @@ export const refreshSession = async (req: Request, res: Response) => {
   if (!foundUser) {
     jwt.verify(refreshToken.refresh_token, process.env.JWT_SECRET_KEY ?? '', async (err: any, decoded: any) => {
       if (err) {
-        // return res.sendStatus(403).send({ error: true })
         logger.info(err)
         return res.status(403).send({ status: false, statusCode: 403, message: err.message })
       }
@@ -150,7 +140,7 @@ export const refreshSession = async (req: Request, res: Response) => {
           }
         })
         console.log(result)
-        res.sendStatus(403)
+        return res.status(403).send({ status: false, statusCode: 403, message: 'Forbidden' })
       }
     })
     logger.info('refreshtoken not found in user database!')
@@ -169,6 +159,7 @@ export const refreshSession = async (req: Request, res: Response) => {
         where: { username: foundUser.username },
         data: foundUser
       })
+      return res.status(403).send({ status: false, statusCode: 403, message: err.message })
     }
     if (err || foundUser.username !== decoded.username) return res.sendStatus(403).send({ status: false })
 
