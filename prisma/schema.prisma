@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
+    provider = "cockroachdb"
     url      = env("DATABASE_URL")
 }
 
@@ -27,7 +27,7 @@ enum StatusCheckin {
 }
 
 model checkIn {
-    id         Int           @id @default(autoincrement())
+    id         Int           @id @default(sequence())
     name       String
     address    String
     grade      String?
