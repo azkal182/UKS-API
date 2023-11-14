@@ -5,10 +5,10 @@ import { AuthRouter } from './auth.route'
 import { CheckinRouter } from './checkin.route'
 
 const _routes: Array<[string, Router]> = [
-  ['/health', HealtRouter],
-  ['/product', ProductRouter],
-  ['/auth', AuthRouter],
-  ['/checkin', CheckinRouter]
+  ['/api/health', HealtRouter],
+  ['/api/product', ProductRouter],
+  ['/api/auth', AuthRouter],
+  ['/api/checkin', CheckinRouter]
 ]
 
 export const routes = (app: Application) => {

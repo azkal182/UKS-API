@@ -19,6 +19,10 @@ app.use(cors())
 //   res.setHeader('Access-Control-Allow-Headers', '*')
 // })
 
+app.get('/', (req, res) => {
+  res.json({ app_name: 'api poskestren' })
+})
+
 app.use(deserializeToken)
 routes(app)
 app.listen(posrt, () => {
