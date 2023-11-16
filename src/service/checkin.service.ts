@@ -7,14 +7,16 @@ interface CustomResponse extends Response {
   paginatedResult?: number
 }
 
-export const getAll = async (req: Request, res: CustomResponse): Promise<any> => {
+const getAll = async (req: Request, res: CustomResponse): Promise<any> => {
   try {
     const query = req.query
     const page: number = parseInt(query.page as string, 10) || 1
     const limit: number = parseInt(query.limit as string, 10) || 20
     const lastPage = req.query.last_page
     const status: string = (req.query.status as string) || 'UKS'
-    const statusCheckinArray: StatusCheckin[] = status.split(',') as StatusCheckin[]
+    const statusCheckinArray: StatusCheckin[] = status
+      .split(',')
+      .map((item: string) => item.trim().toUpperCase()) as StatusCheckin[]
 
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
@@ -146,11 +148,50 @@ export const getAll = async (req: Request, res: CustomResponse): Promise<any> =>
   }
 }
 
-export const create = async (payload: Prisma.checkInCreateInput) => {
+const create = async (payload: Prisma.checkInCreateInput) => {
   return await prismaClient.checkIn.create({ data: payload })
+}
+
+interface checkInUpdate extends Prisma.checkInUpdateInput {
+  id: number
+}
+
+const update = async (payload: checkInUpdate) => {
+  const result: Prisma.checkInUpdateInput = {}
+
+  if (payload.name) {
+    result.name = payload.name
+  }
+  if (payload.address) {
+    result.address = payload.address
+  }
+  if (payload.room) {
+    result.room = payload.room
+  }
+  if (payload.grade) {
+    result.grade = payload.grade
+  }
+  if (payload.complaint) {
+    result.complaint = payload.complaint
+  }
+
+  if (payload.status) {
+    result.status = payload.status
+  }
+
+  return await prismaClient.checkIn.update({
+    where: {
+      id: payload.id
+    },
+    data: {
+      ...result,
+      return_at: payload.status ? new Date() : null
+    }
+  })
 }
 
 export default {
   getAll,
-  create
+  create,
+  update
 }

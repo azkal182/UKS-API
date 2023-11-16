@@ -11,3 +11,16 @@ export const createCheckinValidation = (payload: string) => {
   })
   return schema.validate(payload)
 }
+
+export const updateCheckinValidation = (payload: string) => {
+  const schema = Joi.object({
+    id: Joi.number().required(),
+    name: Joi.string().max(100).optional(),
+    address: Joi.string().max(100).optional(),
+    room: Joi.string().max(100).optional(),
+    grade: Joi.string().max(100).optional(),
+    complaint: Joi.string().max(100).optional(),
+    status: Joi.string().max(100).optional()
+  })
+  return schema.validate(payload)
+}

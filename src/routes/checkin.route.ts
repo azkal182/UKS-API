@@ -5,3 +5,4 @@ export const CheckinRouter: Router = Router()
 
 CheckinRouter.get('/', requireUser, checkinController.get)
 CheckinRouter.post('/', requireUser, checkinController.create)
+CheckinRouter.patch('/', requireUser, checkinController.update)
