@@ -2,11 +2,12 @@ import { type Request, type Response } from 'express'
 import { createSessionValidation, createUserValidation, refreshSessionValidation } from '../validation/auth.validation'
 import { logger } from '../utils/logger'
 import { checkPassword, hashing } from '../utils/hashing'
-import { createUser, findUserByUsername, getAllUser } from '../service/auth.service'
+import authService from '../service/auth.service'
 import { signJWT } from '../utils/jwt'
 import { prismaClient } from '../utils/database'
 import jwt from 'jsonwebtoken'
-export const registerUser = async (req: Request, res: Response) => {
+
+const registerUser = async (req: Request, res: Response) => {
   const { error, value } = createUserValidation(req.body)
   if (error != null) {
     logger.error('ERR auth - register = ', error.details[0].message)
@@ -15,7 +16,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
   try {
     value.password = `${hashing(value.password)}`
-    await createUser(value)
+    await authService.createUser(value)
     return res.status(201).send({ status: true, statusCode: 201, message: 'Success register user' })
   } catch (error: any) {
     logger.error('ERR auth - register = ', error.message)
@@ -23,7 +24,7 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 }
 
-export const createSession = async (req: Request, res: Response) => {
+const createSession = async (req: Request, res: Response) => {
   //   const cookies = req.cookies
   //   logger.info(`cookie available at login: ${JSON.stringify(cookies)}`)
   const { error, value } = createSessionValidation(req.body)
@@ -33,7 +34,7 @@ export const createSession = async (req: Request, res: Response) => {
   }
 
   try {
-    const user: any = await findUserByUsername(value.username)
+    const user: any = await authService.findUserByUsername(value.username)
     const isValidPassword = checkPassword(value.password, user.password)
     if (!isValidPassword) {
       return res.status(401).send({ status: false, statusCode: 401, message: 'invalid username or password' })
@@ -84,9 +85,9 @@ export const createSession = async (req: Request, res: Response) => {
   }
 }
 
-export const getAllUserController = async (req: Request, res: Response) => {
+const getAllUser = async (req: Request, res: Response) => {
   try {
-    const user: any = await getAllUser()
+    const user: any = await authService.getAllUser()
     return res.status(200).send({ status: true, statusCode: 200, data: user })
   } catch (error: any) {
     logger.error('ERR auth - createSession = ', error.message)
@@ -94,18 +95,7 @@ export const getAllUserController = async (req: Request, res: Response) => {
   }
 }
 
-export const findUserByRefreshToken = async (refreshToken: string): Promise<any> => {
-  const foundUser = await prismaClient.user.findFirst({
-    where: {
-      refreshToken: {
-        hasSome: ['...refreshToken']
-      }
-    }
-  })
-
-  return foundUser
-}
-export const refreshSession = async (req: Request, res: Response) => {
+const refreshSession = async (req: Request, res: Response) => {
   const { error, value: refreshToken } = refreshSessionValidation(req.body)
 
   if (error != null) {
@@ -188,4 +178,18 @@ export const refreshSession = async (req: Request, res: Response) => {
 
     return res.status(200).send({ status: true, statusCode: 200, accessToken, newRefreshToken })
   })
+}
+
+const current = async (req: Request, res: Response) => {
+  const user = res.locals.user
+
+  return res.status(200).send({ status: true, statusCode: 200, data: user })
+}
+
+export default {
+  registerUser,
+  createSession,
+  getAllUser,
+  refreshSession,
+  current
 }
