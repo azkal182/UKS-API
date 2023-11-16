@@ -34,7 +34,6 @@ const update = async (req: Request, res: Response): Promise<any> => {
       logger.error('ERR checkin - update Checkin = ', error.details[0].message)
       return res.status(422).send({ status: false, statusCode: 422, message: error.details[0].message })
     }
-
     const data = await checkinService.update(value)
     res.send({ status: true, statusCode: 200, data })
   } catch (error: any) {
